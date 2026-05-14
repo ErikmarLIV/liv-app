@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIV — Know Your Fabric</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F6F1E7;--surface:#EDE6D3;--surface2:#E0D8C3;--primary:#1E3A0E;--primary-lt:#2D561A;--accent:#C4622D;--text:#1A1A1A;--muted:#6B6358;--border:#C8BFB0;--good:#2A6219;--okay:#8B6914;--bad:#B5321A;--r:12px;}
+html{background:#F6F1E7;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto;padding-bottom:32px;}
+header{background:var(--primary);padding:16px 18px 0;position:sticky;top:0;z-index:100;}
+.brand{display:flex;align-items:center;gap:10px;padding-bottom:13px;}
+.brand-name{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;color:var(--bg);letter-spacing:.04em;}
+.brand-tag{font-size:11px;font-weight:300;letter-spacing:.15em;text-transform:uppercase;color:rgba(246,241,231,.6);}
+.lang-toggle{display:flex;border:1px solid rgba(246,241,231,.28);border-radius:20px;overflow:hidden;margin-left:auto;flex-shrink:0;}
+.lang-btn{padding:5px 11px;background:none;border:none;color:rgba(246,241,231,.45);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:.15s;letter-spacing:.06em;}
+.lang-btn.active{background:rgba(246,241,231,.16);color:var(--bg);}
+nav{display:flex;border-top:1px solid rgba(255,255,255,.12);}
+.tab-btn{flex:1;padding:11px 8px;background:none;border:none;color:rgba(246,241,231,.5);font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;letter-spacing:.04em;cursor:pointer;border-bottom:2px solid transparent;transition:.18s;}
+.tab-btn.active{color:var(--bg);border-bottom-color:var(--accent);}
+.tab{display:none;padding:22px 18px;}
+.tab.active{display:block;}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--primary);margin-bottom:5px;}
+.sec-sub{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:20px;}
+.mat-row{display:flex;gap:8px;align-items:center;margin-bottom:9px;animation:slideIn .2s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.mat-select{flex:1;padding:11px 30px 11px 12px;border:1.5px solid var(--border);border-radius:var(--r);background:white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236B6358' fill='none' stroke-width='1.5'/%3E%3C/svg%3E") right 10px center no-repeat;appearance:none;font-family:'DM Sans',sans-serif;font-size:13.5px;color:var(--text);cursor:pointer;}
+.mat-select:focus{outline:none;border-color:var(--primary);}
+.pct-input{width:68px;padding:11px 8px;border:1.5px solid var(--border);border-radius:var(--r);background:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--text);text-align:center;}
+.pct-input:focus{outline:none;border-color:var(--primary);}
+.del-btn{width:34px;height:34px;border:none;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:20px;flex-shrink:0;line-height:1;transition:.15s;}
+.del-btn:hover{background:var(--surface2);color:var(--bad);}
+.add-btn{width:100%;padding:12px;border:1.5px dashed var(--border);border-radius:var(--r);background:none;color:var(--primary-lt);font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;transition:.2s;margin-bottom:4px;}
+.add-btn:hover{border-color:var(--primary);background:var(--surface);}
+.total-bar{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border-radius:var(--r);padding:13px 16px;margin:14px 0 8px;}
+.total-lbl{font-size:12.5px;color:var(--muted);font-weight:500;letter-spacing:.04em;}
+.total-val{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;}
+.total-val.good{color:var(--good);}
+.total-val.over{color:var(--bad);}
+.total-val.under{color:var(--okay);}
+.prog{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:2px;transition:width .3s,background .3s;}
+.hint{font-size:12px;color:var(--muted);text-align:center;padding:8px 0;}
+.results{margin-top:22px;animation:fadeUp .35s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.res-head{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--primary);margin-bottom:14px;padding-bottom:11px;border-bottom:1px solid var(--border);}
+.grade-card{display:flex;align-items:center;gap:14px;background:white;border-radius:var(--r);padding:18px;margin-bottom:10px;border:1.5px solid var(--border);}
+.grade-circle{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;flex-shrink:0;}
+.gA{background:#DCF0D6;color:#1A5012;}.gB{background:#E4EEF9;color:#1A4080;}.gC{background:#FEF0C4;color:#7A5810;}.gD{background:#FDE8E4;color:#A02818;}.gF{background:#F0E0DE;color:#7A0808;}
+.grade-label{font-size:11.5px;color:var(--muted);font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+.grade-text{font-size:15px;color:var(--text);line-height:1.35;}
+.metric-card{background:var(--surface);border-radius:var(--r);padding:15px;margin-bottom:9px;}
+.metric-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+.metric-nm{font-size:11.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.metric-val{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;}
+.metric-unit{font-size:11px;color:var(--muted);font-weight:400;margin-left:2px;}
+.mbar{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-bottom:7px;}
+.mbar-fill{height:100%;border-radius:3px;transition:width .6s ease;}
+.fill-good{background:#4C9C3A;}.fill-okay{background:#D4A017;}.fill-bad{background:#C4622D;}.fill-vbad{background:#B5321A;}
+.metric-ctx{font-size:12px;color:var(--muted);line-height:1.45;}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:12.5px;font-weight:500;margin-bottom:7px;}
+.badge-good{background:#DCF0D6;color:var(--good);}.badge-partial{background:#FEF0C4;color:var(--okay);}.badge-bad{background:#FDE8E4;color:var(--bad);}
+.tips-box{background:var(--primary);color:var(--bg);border-radius:var(--r);padding:17px;margin-top:10px;}
+.tips-title{font-family:'Cormorant Garamond',serif;font-size:15.5px;font-weight:600;margin-bottom:12px;opacity:.9;}
+.context-item{padding:10px 0;border-bottom:1px solid rgba(246,241,231,.15);}
+.context-item:last-child{border-bottom:none;padding-bottom:0;}
+.context-fiber{font-size:11.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;opacity:.6;margin-bottom:5px;}
+.context-txt{font-size:12.5px;line-height:1.6;opacity:.85;}
+.care-cat{margin-bottom:22px;}
+.care-cat-ttl{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:11px;}
+.care-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+.care-item{background:var(--surface);border-radius:var(--r);padding:13px 8px;text-align:center;cursor:pointer;border:1.5px solid transparent;transition:.18s;}
+.care-item:active,.care-item.sel{border-color:var(--primary);background:white;}
+.care-sym{width:46px;height:46px;display:block;margin:0 auto 7px;color:var(--primary);}
+.care-short{font-size:11px;font-weight:500;color:var(--text);line-height:1.35;}
+.care-detail{display:none;background:var(--primary);color:var(--bg);border-radius:var(--r);padding:17px;margin-top:9px;}
+.care-detail.vis{display:block;animation:slideIn .2s ease;}
+.care-detail-ttl{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;margin-bottom:8px;}
+.care-detail-txt{font-size:13px;line-height:1.6;opacity:.85;}
+.care-detail-tip{margin-top:10px;padding-top:9px;border-top:1px solid rgba(246,241,231,.2);font-size:12px;opacity:.7;font-style:italic;}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="brand-name">LIV</span>
+    <span class="brand-tag" id="brand-tag"></span>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('en',this)">EN</button>
+      <button class="lang-btn" onclick="setLang('lt',this)">LT</button>
+    </div>
+  </div>
+  <nav>
+    <button class="tab-btn active" id="tab-btn-checker" onclick="showTab('checker',this)"></button>
+    <button class="tab-btn" id="tab-btn-care" onclick="showTab('care',this)"></button>
+  </nav>
+</header>
+
+<div id="tab-checker" class="tab active">
+  <div class="sec-title" id="checker-title"></div>
+  <div class="sec-sub" id="checker-sub"></div>
+  <div id="mat-rows"></div>
+  <button class="add-btn" id="add-btn" onclick="addRow()"></button>
+  <div class="total-bar">
+    <span class="total-lbl" id="total-lbl"></span>
+    <span class="total-val under" id="tot-disp">0%</span>
+  </div>
+  <div class="prog"><div class="prog-fill" id="prog-fill" style="width:0%;background:var(--okay)"></div></div>
+  <div class="hint" id="hint-txt"></div>
+  <div id="results"></div>
+</div>
+
+<div id="tab-care" class="tab">
+  <div class="sec-title" id="care-title"></div>
+  <div class="sec-sub" id="care-sub"></div>
+  <div id="care-cats"></div>
+</div>
+
+<script>
+let lang='en';
+
+const T={
+en:{
+  brand_tag:"Know your fabric",tab_checker:"Material Checker",tab_care:"Care Labels",
+  checker_title:"What's in your garment?",
+  checker_sub:"Enter the fabric composition from the care label. Add rows until you reach 100%.",
+  add_btn:"+ Add material",total_lbl:"Fabric total",select_mat:"Select material\u2026",
+  hint_empty:"Add materials and percentages above",
+  hint_remaining:n=>`${n}% remaining to reach 100%`,
+  hint_over:"Over 100% \u2014 adjust the percentages.",
+  res_head:"Sustainability Profile",grade_label:"Overall rating",
+  metric_co2:"Carbon footprint",co2_unit:"kg CO\u2082e/kg",
+  metric_water:"Water stress",metric_chem:"Chemical & pesticide use",metric_eol:"End of life",
+  context_head:"How these fibres are produced",
+  care_title:"Care Label Guide",care_sub:"Tap any symbol to learn what it means.",
+  grade_texts:{
+    A:"Low environmental impact across the key dimensions \u2014 a responsible choice.",
+    B:"Above average sustainability. Trade-offs present but overall a solid option.",
+    C:"Mixed profile. At least one significant environmental concern worth knowing.",
+    D:"High environmental cost in one or more critical areas. Alternatives exist.",
+    F:"Very high impact across multiple dimensions. Consider avoiding or replacing."
+  },
+  ws:["Rain-fed \u2014 minimal water stress","Low irrigation dependency","Moderate water use \u2014 some irrigation","High water stress \u2014 heavy irrigation","Extreme water stress \u2014 major irrigation crop"],
+  ch:["Minimal chemical inputs","Moderate chemical use","High chemical use \u2014 pesticides or solvents","Very high \u2014 toxic chemicals in cultivation or processing"],
+  bio_yes:"Biodegradable",bio_partial:"Partially biodegradable",bio_no:"Not biodegradable",
+  micro_none:"\u2713 No microplastic shedding",micro_low:"\u26A0 Low microplastic risk",micro_mid:"\u26A0 Microplastic shedding risk",micro_high:"\u26A0 High microplastic shedding",
+  co2_ctx:v=>{const km=Math.round(v/0.21);if(v<5)return"Lower than most natural fibres \u2014 solid choice.";if(v<15)return`Equivalent to ~${km}\u202Fkm driven by car per kg of fabric.`;return`Equivalent to ~${km}\u202Fkm driven \u2014 significant footprint.`;},
+  cat_plant:"\u2014 Natural Plant Fibres \u2014",cat_animal:"\u2014 Natural Animal Fibres \u2014",cat_semi:"\u2014 Semi-Synthetic Fibres \u2014",cat_synth:"\u2014 Synthetic Fibres \u2014"
+},
+lt:{
+  brand_tag:"Pa\u017eink savo audin\u012f",tab_checker:"Med\u017eiag\u0173 tikrintuvas",tab_care:"Prie\u017ei\u016bros etike\u010d\u0117s",
+  checker_title:"I\u0161 ko pagamintas j\u016bs\u0173 drabu\u017eis?",
+  checker_sub:"\u012eveskite med\u017eiag\u0173 sud\u0117t\u012f i\u0161 prie\u017ei\u016bros etike\u010dt\u0117s. Prid\u0117kite eilut\u0173, kol pasieksite 100%.",
+  add_btn:"+ Prid\u0117ti med\u017eiag\u0105",total_lbl:"Viso",select_mat:"Pasirinkite med\u017eiag\u0105\u2026",
+  hint_empty:"Prid\u0117kite med\u017eiagas ir procentus auk\u0161\u010diau",
+  hint_remaining:n=>`Liko ${n}% iki 100%`,
+  hint_over:"Vir\u0161yta 100% \u2014 pakoreguokite procentus.",
+  res_head:"Tvarumo profilis",grade_label:"Bendras \u012fvertinimas",
+  metric_co2:"Anglies p\u0117dsakas",co2_unit:"kg CO\u2082e/kg",
+  metric_water:"Vandens stresas",metric_chem:"Chemini\u0173 med\u017eiag\u0173 naudojimas",metric_eol:"Gyvavimo ciklo pabaiga",
+  context_head:"Kaip gaminami \u0161ie plu\u0161tai",
+  care_title:"Prie\u017ei\u016bros etike\u010dt\u0117s vadovas",care_sub:"Palieskite bet kur\u012f simbol\u012f, kad su\u017einot\u0173te jo rei\u0161km\u0119.",
+  grade_texts:{
+    A:"Ma\u017eas poveikis aplinkai visais pagrindiniais aspektais \u2014 atsakingas pasirinkimas.",
+    B:"Auk\u0161tesnis nei vidutinis tvarumas. Yra kompromis\u0173, ta\u010diau bendrai tai tinkamas pasirinkimas.",
+    C:"Mi\u0161rus profilis. Bent viena rei\u0161kminga aplinkosaugin\u0117 problema, kuri\u0105 verta \u017einoti.",
+    D:"Didel\u0117s aplinkosaugin\u0117s s\u0105naudos. Yra alternatyv\u0173.",
+    F:"Labai didelis poveikis keliais aspektais. Apsvarstykite galimyb\u0119 vengti arba pakeisti."
+  },
+  ws:["Dr\u0117kinamas lietaus \u2014 minimalus vandens stresas","Ma\u017ea dr\u0117kinimo priklausomyb\u0117","Vidutinis vandens naudojimas \u2014 \u0161iek tiek dr\u0117kinimo","Didelis vandens stresas \u2014 intensyvus dr\u0117kinimas","I\u0161in didelis vandens stresas \u2014 labai intensyviai dr\u0117kinamas augalas"],
+  ch:["Minimalus cheminis poveikis","Vidutinis chemini\u0173 med\u017eiag\u0173 naudojimas","Didelis \u2014 pesticidai arba tirpikliai","Labai didelis \u2014 tok\u0161i\u0161kos chemines med\u017eiagos"],
+  bio_yes:"Biologiškai skaidus",bio_partial:"I\u0161 dalies biologiškai skaidus",bio_no:"Nebiologiškai skaidus",
+  micro_none:"\u2713 Mikroplastikas nesiskiria",micro_low:"\u26A0 Ma\u017ea mikroplastiko rizika",micro_mid:"\u26A0 Mikroplastiko patekimo rizika",micro_high:"\u26A0 Didelis mikroplastiko kiekis",
+  co2_ctx:v=>{const km=Math.round(v/0.21);if(v<5)return"Ma\u017eesnis nei dauguma natūrali\u0173 plu\u0161t\u0173 \u2014 puikus pasirinkimas.";if(v<15)return`Atitinka ~${km}\u202Fkm kelion\u0119 automobiliu vienam kg audinio.`;return`Atitinka ~${km}\u202Fkm kelion\u0119 \u2014 rei\u0161kmingas p\u0117dsakas.`;},
+  cat_plant:"\u2014 Natūralūs augaliniai plu\u0161tai \u2014",cat_animal:"\u2014 Natūralūs gyv\u016bniniai plu\u0161tai \u2014",cat_semi:"\u2014 Pusiau sintetiniai plu\u0161tai \u2014",cat_synth:"\u2014 Sintetiniai plu\u0161tai \u2014"
+}};
+
+const CAT_KEYS=["_plant","_animal","_semi","_synth"];
+const M_ORDER=[
+  {cat:"_plant"},
+  {key:"Cotton",co2:5.0,chem:4,bio:"yes",micro:"none",ws:5,land:3,name:{en:"Cotton",lt:"Medvilnė"},tip:{en:"Despite being natural, conventional cotton is one of fashion's most damaging crops.",lt:"Nepaisant natūralumo, tradicinė medvilnė yra vienas žalingiausių mados augalų."},context:{en:"Covers just 2.4% of global farmland yet uses 11% of all pesticides worldwide. Massive irrigation has caused severe water depletion in multiple regions. Heavy use of synthetic fertilisers degrades soil health over time.",lt:"Apima vos 2,4% pasaulio žemės ūkio plotų, tačiau naudoja 11% visų pesticidų. Masiškas drėkinimas sukelia vandens išeikvojimą daugelyje regionų. Sintetinės trąšos ilgainiui niokoja dirvožemį."}},
+  {key:"Cotton (Organic)",co2:2.1,chem:2,bio:"yes",micro:"none",ws:4,land:1,name:{en:"Cotton (Organic)",lt:"Ekologiška medvilnė"},tip:{en:"A meaningful step up from conventional, but still water-intensive.",lt:"Reikšmingas žingsnis pirmyn, bet vandens naudojimas išlieka didelis."},context:{en:"Eliminates synthetic pesticides and improves soil health. However, organic cotton yields ~20% less per hectare, requiring more land per kg of fibre. Water footprint remains high even without irrigation chemicals.",lt:"Pašalina sintetinius pesticidus ir gerina dirvožemio sveikatą. Tačiau derlius ~20% mažesnis hektarui, todėl vienam kilogramui reikia daugiau žemės. Vandens pėdsakas išlieka didelis."}},
+  {key:"Linen",co2:3.1,chem:1,bio:"yes",micro:"none",ws:0,land:0,name:{en:"Linen",lt:"Linas"},tip:{en:"One of the most sustainable natural fibres you can choose.",lt:"Vienas tvariausių natūralių pluoštų."},context:{en:"Flax grows rain-fed in Europe with minimal pesticides and the entire plant is used — seeds for oil, straw for paper and insulation. It actually improves soil structure. Processing uses natural dew-retting with no chemical solvents.",lt:"Linai auga lietaus drėkinami Europoje, praktiškai nereikalaujant pesticidų, o visa augalo dalis panaudojama — sėklos aliejui, šiaudai popieriui. Pagerina dirvožemio struktūrą. Apdirbimas be cheminių tirpiklių."}},
+  {key:"Hemp",co2:0.5,chem:1,bio:"yes",micro:"none",ws:0,land:0,name:{en:"Hemp",lt:"Kanapė"},tip:{en:"Among the most sustainable fibres available — an excellent choice.",lt:"Vienas tvariausių pluoštų — puikus pasirinkimas."},context:{en:"A carbon-negative crop: one hectare absorbs ~11 tonnes of CO₂. Naturally pest-resistant — no pesticides or irrigation needed. Hemp improves soil through phytoremediation and requires ~50–75% less energy than cotton.",lt:"Neigiamo anglies pėdsakas: vienas hektaras absorbuoja ~11 tonų CO₂. Natūraliai atsparios kenkėjams — nereikia pesticidų ar drėkinimo. Gerina dirvožemį per fitoremediciją ir reikia ~50–75% mažiau energijos nei medvilnei."}},
+  {key:"Jute",co2:0,chem:1,bio:"yes",micro:"none",ws:0,land:0,name:{en:"Jute",lt:"Džiutas"},tip:{en:"Carbon-negative. Extremely low impact. Mostly used in bags, not clothing.",lt:"Neigiamo anglies pėdsakas. Itin mažas poveikis. Daugiau naudojamas maišams nei drabužiams."},context:{en:"Sequesters ~4.9 tonnes of CO₂ per tonne of fibre. Grown in high-rainfall regions with no irrigation and minimal fertiliser. Enriches soil after harvest.",lt:"Sukaupiantis ~4,9 tonos CO₂ vienai tonai pluošto. Auginamas be drėkinimo ir su minimaliu trąšų kiekiu. Praturtina dirvožemį po derliaus."}},
+  {key:"Bamboo (mechanical)",co2:3.0,chem:1,bio:"yes",micro:"none",ws:0,land:0,name:{en:"Bamboo (mechanical)",lt:"Bambukas (mechaninis)"},tip:{en:"Rare but genuinely sustainable. Do not confuse with bamboo viscose.",lt:"Reta, bet tikrai tvaru. Nereikia painioti su bambukinė viskozė."},context:{en:"True mechanically processed bamboo grows without fertiliser or pesticides and regenerates from roots. However, this fibre is almost never sold commercially — most 'bamboo' clothing is viscose rayon.",lt:"Tikrasis mechaniniu būdu apdorotas bambukas auga be trąšų ir pesticidų. Tačiau beveik niekada neparduodamas komerciniais tikslais — dauguma bambuko drabužių iš tikrųjų yra viskozė."}},
+  {cat:"_animal"},
+  {key:"Wool",co2:55,chem:3,bio:"yes",micro:"none",ws:1,land:2,name:{en:"Wool",lt:"Vilna"},tip:{en:"High GHG footprint — but biodegradable and durable if well cared for.",lt:"Didelis ŠESD pėdsakas, bet biologiškai skaidus ir ilgaamžis."},context:{en:"Sheep produce methane through digestion — this drives most of wool's carbon footprint. Well-managed pasture can support biodiversity. A quality wool garment worn for 20 years offsets much of its production impact.",lt:"Avys išskiria metaną virškinimo metu — tai sudaro didžiąją dalį pėdsako. Gerai tvarkomi ganyklai gali palaikyti biologinę įvairovę. Vilnos drabužis, nešiotas 20 metų, kompensuoja didelę gamybos poveikio dalį."}},
+  {key:"Merino Wool",co2:55,chem:3,bio:"yes",micro:"none",ws:1,land:2,name:{en:"Merino Wool",lt:"Merino vilna"},tip:{en:"Same footprint as standard wool. Look for certifications covering land and animal welfare.",lt:"Toks pat pėdsakas kaip paprastos vilnos. Ieškokite sertifikatų, apimančių žemės valdymą."},context:{en:"Identical environmental profile to regular wool. Independent certifications for responsible wool production address land management, soil health, and animal welfare.",lt:"Identiškas aplinkosauginis profilis kaip įprastos vilnos. Nepriklausomi sertifikatai sprendžia žemės valdymo ir gyvūnų gerovės klausimus."}},
+  {key:"Alpaca",co2:37.5,chem:2,bio:"yes",micro:"none",ws:0,land:1,name:{en:"Alpaca",lt:"Alpaka"},tip:{en:"Lower impact than wool. Alpacas are gentler on ecosystems than sheep.",lt:"Mažesnis poveikis nei vilnos. Alpakos ekosistemoms kenkia mažiau."},context:{en:"Alpacas produce significantly less methane than sheep and have soft padded feet that cause less soil compaction. They graze native Andean pastures without fertiliser.",lt:"Alpakos išskiria žymiai mažiau metano nei avys ir turi minkštus pėdus, kurie mažiau tankina dirvožemį. Jos gano vietinius Andų ganyklus be trąšų."}},
+  {key:"Cashmere",co2:225,chem:2,bio:"yes",micro:"none",ws:1,land:5,name:{en:"Cashmere",lt:"Kašmyras"},tip:{en:"Luxury with a very serious environmental cost. One of fashion's most destructive fibres.",lt:"Prabanga su labai rimtomis aplinkosauginėmis pasekmėmis. Vienas destruktyviausių mados pluoštų."},context:{en:"Cashmere goats have turned over 65% of Mongolia's grasslands into degraded desert. Each goat produces only ~150g of fibre per year, making the carbon cost extreme. Consumer demand for cheap cashmere has tripled goat populations in 20 years.",lt:"Kašmyro ožkai sunaikino daugiau nei 65% Mongolijos pievų. Kiekviena ožka pagamina tik ~150 g pluošto per metus, todėl anglies pėdsakas kilogramui yra ekstremalus. Paklausa pigiam kašmyrui per 20 metų patrigubino ožkų skaičių."}},
+  {key:"Mohair",co2:45,chem:3,bio:"yes",micro:"none",ws:1,land:2,name:{en:"Mohair",lt:"Moheras"},tip:{en:"High GHG, but durable. Look for certified responsible production.",lt:"Didelės ŠESD emisijos, bet ilgalaikis. Ieškokite sertifikuotos gamybos."},context:{en:"Produced mainly in South Africa from Angora goats. Methane emissions are the main environmental driver. Certified production standards address land management and animal welfare.",lt:"Gaminamas daugiausia Pietų Afrikoje iš angoros ožkų. Sertifikuoti standartai sprendžia žemės valdymo ir gyvūnų gerovės klausimus."}},
+  {key:"Silk",co2:24,chem:3,bio:"yes",micro:"none",ws:3,land:0,name:{en:"Silk",lt:"Šilkas"},tip:{en:"Extremely resource-intensive. The most water and energy-heavy of all natural fibres.",lt:"Itin daug išteklių reikalaujantis. Daugiausiai vandens ir energijos iš visų natūralių pluoštų."},context:{en:"Mulberry cultivation requires significant irrigation, fertilisers, and pesticides. Silk reeling involves boiling thousands of cocoons per kg of fibre. Some studies report water use up to 1 million litres per kg of finished fabric.",lt:"Šilkmedžio auginimas reikalauja didelio drėkinimo, trąšų ir pesticidų. Šilko vijimas apima tūkstančių kokonų virinimą vienam kilogramui. Kai kurie tyrimai rodo iki 1 mln. litrų vandens vienam kg audinio."}},
+  {cat:"_semi"},
+  {key:"Viscose",co2:7.5,chem:4,bio:"yes",micro:"none",ws:1,land:3,name:{en:"Viscose",lt:"Viskozė"},tip:{en:"A biodegradable fibre made with a toxic process. Sourcing and production practices vary enormously.",lt:"Biologiškai skaidus pluoštas, gaminamas toksiniu procesu. Praktikos labai skiriasi."},context:{en:"Made from wood pulp, but the conventional process uses carbon disulfide (CS₂) — a toxic solvent linked to neurological damage in workers. Deforestation is a real risk: some pulp comes from ancient forests.",lt:"Gaminamas iš medienos plaušienos, bet tradicinis procesas naudoja anglies disulfidą (CS₂) — toksiškų tirpiklį, susijusį su nervų sistemos pažeidimais. Miškų naikinimas yra realus pavojus."}},
+  {key:"Rayon",co2:7.5,chem:4,bio:"yes",micro:"none",ws:1,land:3,name:{en:"Rayon",lt:"Rėjonas"},tip:{en:"Same as viscose. Linked to deforestation if not certified.",lt:"Tas pats kaip viskozė. Susijęs su miškų naikinimu, jei nesertifikuotas."},context:{en:"Rayon is viscose by another name. The toxic CS₂ process has caused documented health crises in production countries. Lyocell uses a closed-loop, far safer process.",lt:"Rėjonas yra viskozė kitu pavadinimu. Toksiškas procesas sukėlė dokumentuotų sveikatos krizių. Liocelis naudoja uždarą kilpą, daug saugesnį procesą."}},
+  {key:"Bamboo (viscose)",co2:7.5,chem:4,bio:"yes",micro:"none",ws:1,land:2,name:{en:"Bamboo (viscose)",lt:"Bambukas (viskozė)"},tip:{en:"The bamboo plant is sustainable — the viscose process is not. Widely considered misleading labelling.",lt:"Bambukas kaip augalas yra tvarus — viskozės procesas nėra. Plačiai laikoma klaidinančia etiketė."},context:{en:"Despite 'natural bamboo' marketing, this fibre is produced via the same toxic CS₂ process as conventional viscose. The plant itself is sustainable, but the conversion process negates most of that benefit.",lt:"Nepaisant rinkodaros, šis pluoštas gaminamas tuo pačiu toksiniu procesu kaip ir įprasta viskozė. Bambukas kaip augalas yra tvarus, tačiau konversijos procesas panaikina didžiąją dalį tų privalumų."}},
+  {key:"Modal",co2:6.0,chem:3,bio:"yes",micro:"none",ws:1,land:1,name:{en:"Modal",lt:"Modalas"},tip:{en:"A better viscose — especially from certified producers.",lt:"Geresnė viskozė — ypač iš sertifikuotų gamintojų."},context:{en:"Modal is a high-wet-strength viscose, typically from beech wood. Well-run production recovers ~95% of solvents in a closed loop and uses sustainably managed forests. Beech needs no irrigation or replanting.",lt:"Modalas yra didelio stiprumo viskozė, paprastai iš buko medienos. Gerai organizuota gamyba atgauna ~95% tirpiklių. Bukas nedrėkinamas ir nesodinamas iš naujo."}},
+  {key:"Lyocell",co2:4.5,chem:2,bio:"yes",micro:"none",ws:0.5,land:0.5,name:{en:"Lyocell",lt:"Liocelis"},tip:{en:"One of the best semi-synthetic options available.",lt:"Vienas geriausių pusiau sintetinių variantų."},context:{en:"The lyocell process uses a non-toxic solvent recovered at ~99% efficiency in a closed loop — almost no waste. When sourced from certified forests, deforestation risk is low. Stronger than viscose and fully biodegradable.",lt:"Liocelio procesas naudoja netoksiškų tirpiklį, atgaunamą ~99% efektyvumu — praktiškai be atliekų. Naudojant sertifikuotų miškų žaliavą, miškų naikinimo rizika yra maža. Stipresnis nei viskozė ir visiškai biologiškai skaidus."}},
+  {key:"TENCEL™",co2:4.5,chem:2,bio:"yes",micro:"none",ws:0.5,land:0.5,name:{en:"TENCEL\u2122",lt:"TENCEL\u2122"},tip:{en:"A lyocell fibre produced to high environmental standards.",lt:"Liocelinis pluoštas, gaminamas pagal aukštus aplinkosaugos standartus."},context:{en:"A lyocell fibre produced with renewable energy and certified wood pulp, holding the EU Ecolabel. Widely regarded as an industry benchmark for responsible semi-synthetic production. Biodegrades fully in compost within weeks.",lt:"Liocelinis pluoštas, gaminamas iš atsinaujinančios energijos ir sertifikuotos plaušienos, turintis ES ekologinį ženklą. Visiškai suyra komposte per kelias savaites."}},
+  {key:"Acetate",co2:6.5,chem:3,bio:"partial",micro:"none",ws:1,land:1,name:{en:"Acetate",lt:"Acetatas"},tip:{en:"Partially biodegradable. Chemical modification slows breakdown significantly.",lt:"Iš dalies biologiškai skaidus. Cheminė modifikacija žymiai lėtina irimo procesą."},context:{en:"Acetate is chemically modified cellulose. The acetyl groups make it behave more like a synthetic at end of life, degrading much slower than natural fibres. Common in linings and luxury fabrics.",lt:"Acetatas yra chemiškai modifikuota celiuliozė, kuri skyla žymiai lėčiau nei natūralūs pluoštai. Dažnas pamušaluose ir prabanginiuose audiniuose."}},
+  {key:"Cupro",co2:7.5,chem:3,bio:"yes",micro:"none",ws:1,land:0,name:{en:"Cupro",lt:"Kupras"},tip:{en:"Uses cotton waste as feedstock — a genuine upcycling approach if production is managed well.",lt:"Naudoja medvilnės atliekas — tikras perdirbimo sprendimas, jei gamyba gerai valdoma."},context:{en:"Made from cotton linter waste (short fibres discarded in cotton ginning). The main production process claims very high copper and ammonia recovery in a closed loop.",lt:"Gaminamas iš medvilnės linų atliekų (trumpų skaidulų, išmetamų džinimo metu). Gamyba teigia labai aukštą vario ir amoniako atgavimą uždaroje kilpoje."}},
+  {cat:"_synth"},
+  {key:"Polyester",co2:10.3,chem:3,bio:"no",micro:"high",ws:0,land:1,name:{en:"Polyester",lt:"Poliesteris"},tip:{en:"The world's most used fibre — and one of the biggest microplastic contributors.",lt:"Plačiausiai naudojamas pluoštas — ir vienas didžiausių mikroplastiko šaltinių."},context:{en:"Made from crude oil — a non-renewable resource. Persists in the environment for potentially hundreds of years. Releases hundreds of thousands of microplastic fibres into waterways with every wash. Only ~15% of polyester in fashion is currently recycled.",lt:"Gaminamas iš žalios naftos — neatsinaujinančio ištekliaus. Kiekvienam skalbimui į vandenis patenka šimtai tūkstančių mikroplastiko skaidulų. Šiuo metu tik ~15% perdirbama."}},
+  {key:"Recycled Polyester",co2:6.5,chem:2,bio:"no",micro:"high",ws:0,land:1,name:{en:"Recycled Polyester",lt:"Perdirbtas poliesteris"},tip:{en:"Reduces virgin plastic demand but doesn't solve the microplastic problem.",lt:"Mažina pirminės plastiko paklausą, bet mikroplastiko problemos neišsprendžia."},context:{en:"Typically made from plastic bottles, not old clothes — improves plastic waste recovery but doesn't close the textile loop. Saves ~45% GHG vs virgin polyester. Still sheds the same microplastics during washing.",lt:"Paprastai gaminamas iš plastikinių butelių, ne senų drabužių. Sutaupo ~45% ŠESD palyginti su pirminiu poliesteriu. Vis tiek išskiria tą patį mikroplastiką skalbimo metu."}},
+  {key:"Nylon",co2:7.5,chem:3,bio:"no",micro:"high",ws:0,land:1,name:{en:"Nylon",lt:"Nailonas"},tip:{en:"Durable and strong, but petrochemical-based. Recycled nylon from fishing nets is available.",lt:"Ilgalaikis ir tvirtas, bet naftos kilmės. Perdirbtas nailonas iš žvejybos tinklų yra prieinamas."},context:{en:"Production of certain nylon variants historically produced nitrous oxide (N₂O) — a GHG 300× more potent than CO₂. Modern plants have largely captured this. Recycled nylon from fishing nets and carpet waste is a strong circular alternative.",lt:"Kai kurių nailono variantų gamyba istoriškai gamino azoto suboksidą (N₂O) — 300 kartų galingesnį ŠESD nei CO₂. Modernios gamyklos tai sušvelnino. Perdirbtas nailonas iš žvejybos tinklų yra stiprus žiedinis variantas."}},
+  {key:"Acrylic",co2:18,chem:5,bio:"no",micro:"high",ws:0,land:1,name:{en:"Acrylic",lt:"Akrilas"},tip:{en:"One of the least sustainable fibres. Avoid where possible.",lt:"Vienas mažiausiai tvarių pluoštų. Kur įmanoma — venkite."},context:{en:"Made from acrylonitrile — a toxic, carcinogenic monomer. Sheds more microplastics per wash than any other common fibre. No mainstream recycling pathway exists.",lt:"Gaminamas iš akrilonitrilas — toksiško, kancerogeninio monomero. Išskiria daugiau mikroplastiko per vieną skalbimą nei bet kuris kitas įprastas pluoštas. Nėra pagrindinio perdirbimo kelio."}},
+  {key:"Elastane",co2:20,chem:5,bio:"no",micro:"high",ws:0,land:1,name:{en:"Elastane",lt:"Elastanas"},tip:{en:"Even 2% elastane makes the entire garment unrecyclable. A major circularity barrier.",lt:"Net 2% elastano daro visą gaminį neperdirbamu. Pagrindinė žiedingumo kliūtis."},context:{en:"Made from highly toxic petrochemicals. Cannot be separated from blended fabrics cost-effectively — it contaminates and prevents recycling of everything it's combined with.",lt:"Gaminamas iš labai toksiškų naftos chemikalų. Negalima atskirti nuo mišrių audinių — teršia ir trukdo perdirbti viską, su kuo sumaišytas."}},
+  {key:"Spandex",co2:20,chem:5,bio:"no",micro:"high",ws:0,land:1,name:{en:"Spandex",lt:"Spandeksas"},tip:{en:"Same as elastane. Both names refer to the same fibre.",lt:"Tas pats kaip elastanas. Abu pavadinimai nurodo tą patį pluoštą."},context:{en:"Elastane under a different name. The same recycling contamination issue applies. Most athleisure and swimwear contains 15–30% spandex.",lt:"Elastanas kitu pavadinimu. Taikosi ta pati perdirbimo taršos problema. Dauguma sportinių drabužių ir maudymosi kostiumėlių turi 15–30% spandekso."}},
+  {key:"Lycra",co2:20,chem:5,bio:"no",micro:"high",ws:0,land:1,name:{en:"Lycra",lt:"Likra"},tip:{en:"A trade name for elastane. Same environmental profile.",lt:"Komercinis elastano pavadinimas. Toks pat aplinkosauginis profilis."},context:{en:"A trade name for elastane/spandex. Its presence in a blend at any proportion typically makes the garment non-recyclable in current infrastructure.",lt:"Komercinis elastano/spandekso pavadinimas. Jo buvimas mišinyje bet kokiu procentu paprastai daro gaminį neperdirbamu."}},
+  {key:"Polypropylene",co2:2.5,chem:2,bio:"no",micro:"medium",ws:0,land:1,name:{en:"Polypropylene",lt:"Polipropilenas"},tip:{en:"Surprisingly low GHG. Non-biodegradable but theoretically recyclable.",lt:"Netikėtai mažas anglies pėdsakas. Nebiologiškai skaidus, bet teoriškai perdirbamas."},context:{en:"Lowest carbon footprint of common synthetics — produced from refinery byproduct gas. Can be solution-dyed without dyeing chemicals. Recyclable in industrial streams.",lt:"Mažiausias anglies pėdsakas iš įprastų sintetikų. Galima dažyti tirpale be dažymo chemikalų. Perdirbamas pramoniniuose srautuose."}},
+  {key:"PLA (bioplastic)",co2:3.0,chem:2,bio:"partial",micro:"medium",ws:1,land:1,name:{en:"PLA (bioplastic)",lt:"PLA (bioplastikas)"},tip:{en:"Bio-based but not as eco-friendly as it sounds in practice.",lt:"Biobazuotas, bet praktiškai ne toks ekologiškas."},context:{en:"Made from corn starch — renewable, but industrial corn farming uses fertilisers and pesticides. Biodegrades only in industrial composting at 60°C+ — in soil or ocean it behaves like conventional plastic.",lt:"Gaminamas iš kukurūzų krakmolo. Skyla tik pramoninėse kompostavimo aikštelėse (60°C+) — dirvožemyje ar vandenyne elgiasi kaip įprastas plastikas."}}
+];
+
+function getMByKey(k){return M_ORDER.find(m=>m.key===k);}
+
+// ─── SCORING ─────────────────────────────────────────────────
+function co2Pts(v){if(v<1)return 100;if(v<3)return 95;if(v<5)return 88;if(v<8)return 78;if(v<12)return 65;if(v<20)return 50;if(v<40)return 30;if(v<80)return 12;return 0;}
+function calcScore(rows){
+  let co2=0,chem=0,biodeg=0,micro=0,ws=0,land=0;
+  rows.forEach(({key,pct})=>{
+    const d=getMByKey(key);if(!d)return;const p=pct/100;
+    co2+=d.co2*p;chem+=d.chem*p;ws+=d.ws*p;land+=d.land*p;
+    if(d.bio==="yes")biodeg+=pct;else if(d.bio==="partial")biodeg+=pct*0.5;
+    if(d.micro==="high")micro+=pct;else if(d.micro==="medium")micro+=pct*0.5;
+  });
+  return{co2,chem,biodeg,micro,ws,land};
+}
+function getGrade(s){
+  const sc=co2Pts(s.co2)*0.20+((5-s.ws)/5*100)*0.20+((5-s.chem)/5*100)*0.25+s.biodeg*0.17+(100-s.micro)*0.13+((5-s.land)/5*100)*0.05;
+  if(sc>=80)return'A';if(sc>=65)return'B';if(sc>=50)return'C';if(sc>=35)return'D';return'F';
+}
+
+// ─── MATERIAL CHECKER ────────────────────────────────────────
+let rowId=0;
+function matOptions(){
+  const t=T[lang];
+  const catMap={_plant:t.cat_plant,_animal:t.cat_animal,_semi:t.cat_semi,_synth:t.cat_synth};
+  let html=`<option value="">${t.select_mat}</option>`;
+  M_ORDER.forEach(m=>{
+    if(m.cat){html+=`<option value="" disabled>${catMap[m.cat]}</option>`;return;}
+    html+=`<option value="${m.key}">${m.name[lang]}</option>`;
+  });
+  return html;
+}
+function addRow(){
+  rowId++;const id=rowId;
+  const el=document.createElement('div');el.className='mat-row';el.id='row-'+id;
+  el.innerHTML=`<select class="mat-select" onchange="updateTotal()">${matOptions()}</select><input class="pct-input" type="number" min="1" max="100" placeholder="%" oninput="updateTotal()"><button class="del-btn" onclick="delRow(${id})">×</button>`;
+  document.getElementById('mat-rows').appendChild(el);
+  updateTotal();
+}
+function delRow(id){
+  const el=document.getElementById('row-'+id);if(!el)return;
+  el.style.transition='all .18s ease';el.style.opacity='0';el.style.transform='translateY(-5px)';
+  setTimeout(()=>{el.remove();updateTotal();},180);
+}
+function getRows(){
+  return[...document.querySelectorAll('.mat-row')].map(row=>{
+    const key=row.querySelector('select').value;
+    const pct=parseFloat(row.querySelector('input').value)||0;
+    return{key,pct};
+  }).filter(r=>r.key&&getMByKey(r.key)&&r.pct>0);
+}
+function updateTotal(){
+  const rows=getRows();const tot=rows.reduce((s,r)=>s+r.pct,0);
+  const t=T[lang];
+  const disp=document.getElementById('tot-disp');
+  const fill=document.getElementById('prog-fill');
+  const hint=document.getElementById('hint-txt');
+  disp.textContent=tot+'%';fill.style.width=Math.min(tot,100)+'%';
+  if(tot===100){disp.className='total-val good';fill.style.background='#4C9C3A';hint.textContent='';showResults(rows);}
+  else if(tot>100){disp.className='total-val over';fill.style.background='var(--bad)';hint.textContent=t.hint_over;document.getElementById('results').innerHTML='';}
+  else{disp.className='total-val under';fill.style.background='var(--okay)';hint.textContent=tot>0?t.hint_remaining(100-tot):t.hint_empty;document.getElementById('results').innerHTML='';}
+}
+function showResults(rows){
+  const s=calcScore(rows);const g=getGrade(s);const t=T[lang];
+  const wsIdx=Math.min(Math.round(s.ws),4);
+  const chIdx=Math.min(Math.max(Math.round(s.chem)-1,0),3);
+  const wsl=s.ws<1?'good':s.ws<2.5?'okay':s.ws<4?'bad':'vbad';
+  const chl=s.chem<2?'good':s.chem<3?'okay':s.chem<4?'bad':'vbad';
+  const cl=s.co2<5?'good':s.co2<15?'okay':s.co2<40?'bad':'vbad';
+  const bl=s.biodeg>=90?t.bio_yes:s.biodeg>=50?t.bio_partial:t.bio_no;
+  const bc=s.biodeg>=90?'badge-good':s.biodeg>=50?'badge-partial':'badge-bad';
+  const ml=s.micro===0?t.micro_none:s.micro<30?t.micro_low:s.micro<60?t.micro_mid:t.micro_high;
+  const mc=s.micro===0?'badge-good':s.micro<30?'badge-partial':'badge-bad';
+  const contexts=rows.map(r=>{const d=getMByKey(r.key);if(!d||!d.context)return'';
+    return`<div class="context-item"><div class="context-fiber">${d.name[lang]} (${r.pct}%)</div><div class="context-txt">${d.context[lang]}</div></div>`;}).join('');
+  document.getElementById('results').innerHTML=`
+    <div class="results">
+      <div class="res-head">${t.res_head}</div>
+      <div class="grade-card"><div class="grade-circle g${g}">${g}</div><div><div class="grade-label">${t.grade_label}</div><div class="grade-text">${t.grade_texts[g]}</div></div></div>
+      <div class="metric-card"><div class="metric-row"><span class="metric-nm">${t.metric_co2}</span><span class="metric-val">${s.co2.toFixed(1)}<span class="metric-unit">${t.co2_unit}</span></span></div><div class="mbar"><div class="mbar-fill fill-${cl}" style="width:${Math.min(s.co2/80*100,100)}%"></div></div><div class="metric-ctx">${t.co2_ctx(s.co2)}</div></div>
+      <div class="metric-card"><div class="metric-nm" style="margin-bottom:8px;">${t.metric_water}</div><div class="mbar"><div class="mbar-fill fill-${wsl}" style="width:${Math.min(s.ws/5*100,100)}%"></div></div><div class="metric-ctx">${t.ws[wsIdx]}</div></div>
+      <div class="metric-card"><div class="metric-nm" style="margin-bottom:8px;">${t.metric_chem}</div><div class="mbar"><div class="mbar-fill fill-${chl}" style="width:${Math.min((s.chem-1)/4*100,100)}%"></div></div><div class="metric-ctx">${t.ch[chIdx]}</div></div>
+      <div class="metric-card"><div class="metric-nm" style="margin-bottom:10px;">${t.metric_eol}</div><div><span class="badge ${bc}">${bl}</span></div><div><span class="badge ${mc}">${ml}</span></div></div>
+      ${contexts?`<div class="tips-box"><div class="tips-title">${t.context_head}</div>${contexts}</div>`:''}
+    </div>`;
+}
+
+// ─── CARE LABELS ─────────────────────────────────────────────
+const CARE={
+en:[
+  {cat:"Washing",items:[
+    {id:"w30",short:"Wash 30°C",title:"Machine wash at 30°C",text:"Cool cycle — great for lightly soiled items and delicates. Saves significant energy.",tip:"Cold washing extends garment life and uses up to 60% less energy than 60°C."},
+    {id:"w40",short:"Wash 40°C",title:"Machine wash at 40°C",text:"Warm cycle suitable for most everyday garments. Effective for general soiling.",tip:"A good balance of cleaning power and energy use for regular laundry."},
+    {id:"w60",short:"Wash 60°C",title:"Machine wash at 60°C",text:"Hot wash for heavily soiled items or when hygiene sanitisation is needed.",tip:"Reserve for items that genuinely need high-heat sanitising."},
+    {id:"hand",short:"Hand wash",title:"Hand wash only",text:"Do not machine wash. Gently wash by hand in cool water with mild detergent.",tip:"Squeeze gently — never wring or twist the fabric."},
+    {id:"gentle",short:"Gentle cycle",title:"Machine wash — gentle cycle",text:"Machine washing is allowed, but use the delicate setting with reduced agitation and spin.",tip:"A mesh laundry bag gives extra protection to delicate items in the drum."},
+    {id:"nowash",short:"Do not wash",title:"Do not wash",text:"This item cannot be laundered with water at home. Spot clean only, or take to a dry cleaner.",tip:"Check the label for dry cleaning or specialist cleaning instructions."},
+  ]},
+  {cat:"Bleaching",items:[
+    {id:"bleach",short:"Bleach OK",title:"Bleaching allowed",text:"Chlorine bleach may be used. Usually applies to white cotton items requiring sanitisation.",tip:"Use sparingly — bleach degrades fabric fibres and shortens garment life."},
+    {id:"nonchlorine",short:"Non-chlorine only",title:"Non-chlorine bleach only",text:"Oxygen-based bleach is permitted. Chlorine bleach will damage this fabric.",tip:"Oxygen bleach is gentler on fabric and better for the environment."},
+    {id:"nobleach",short:"No bleach",title:"Do not bleach",text:"No bleach of any kind. The colour, fibre, or finish would be permanently damaged.",tip:"Try white vinegar or baking soda dissolved in water as natural stain alternatives."},
+  ]},
+  {cat:"Drying",items:[
+    {id:"tumble",short:"Tumble dry",title:"Tumble dry",text:"The garment can go in a tumble dryer. One dot = low heat, two dots = medium heat.",tip:"Lower heat settings protect fabric fibres and save energy — always preferred."},
+    {id:"notumble",short:"No tumble dry",title:"Do not tumble dry",text:"Do not put in a dryer. Heat or tumbling would damage or shrink this garment.",tip:"Reshape while damp and air dry on a flat surface or padded hanger."},
+    {id:"hang",short:"Hang dry",title:"Line dry / hang to dry",text:"Dry by hanging on a clothesline or hanger. Do not tumble dry.",tip:"Dry in shade to prevent fading — especially important for dark or bright colours."},
+    {id:"flat",short:"Dry flat",title:"Dry flat",text:"Lay flat on a clean surface to dry. Prevents stretching — common for wool knitwear.",tip:"Place on a clean towel and reshape to original dimensions while still damp."},
+  ]},
+  {cat:"Ironing",items:[
+    {id:"iron1",short:"Iron — low",title:"Iron at low temperature (max 110°C / 1 dot)",text:"Use the lowest iron heat setting. Suitable for synthetics: polyester, nylon, acrylic.",tip:"Synthetics can melt or glaze at higher temperatures — always check first."},
+    {id:"iron2",short:"Iron — medium",title:"Iron at medium temperature (max 150°C / 2 dots)",text:"Use medium heat. Suitable for wool, polyester blends, and silk.",tip:"Use a pressing cloth between the iron and delicate fabric to protect the surface."},
+    {id:"iron3",short:"Iron — high",title:"Iron at high temperature (max 200°C / 3 dots)",text:"Use the highest iron setting. Suitable for cotton and linen.",tip:"Slightly damp cotton and linen iron more easily and with a crisper result."},
+    {id:"noiron",short:"Do not iron",title:"Do not iron",text:"Do not apply direct heat with an iron. The fabric or surface finish would be damaged.",tip:"Try a garment steamer held at a distance, or hang in a steamy bathroom."},
+    {id:"nosteam",short:"No steam",title:"Iron — no steam",text:"Dry ironing only. Do not use the steam function — it could mark or damage the fabric.",tip:"Usually applies to velvet, sequins, or fabrics with water-sensitive finishes."},
+  ]},
+  {cat:"Dry Cleaning",items:[
+    {id:"dryclean",short:"Dry clean",title:"Dry clean",text:"Take to a professional dry cleaner. The garment cannot be safely washed with water.",tip:"Ask your cleaner about wet cleaning — it's a gentler, more eco-friendly option."},
+    {id:"drycleanP",short:"Dry clean — P",title:"Dry clean with specific solvents (P)",text:"Dry clean using any solvent except trichloroethylene. Most dry cleaners use compatible solvents.",tip:"Perchloroethylene is toxic. Seek cleaners who offer hydrocarbon or wet cleaning."},
+    {id:"nodryclean",short:"No dry clean",title:"Do not dry clean",text:"Dry cleaning solvents would damage this item. Follow washing instructions instead.",tip:"Often applies to rubber-backed, PU-coated, or foam-padded garments."},
+  ]},
+],
+lt:[
+  {cat:"Skalbimas",items:[
+    {id:"w30",short:"Skalbti 30°C",title:"Skalbti mašinoje 30°C",text:"Šaltas režimas — puikiai tinka lengvai nešvariems ir delikatiems gaminiams. Taupo daug energijos.",tip:"Šaltas skalbimas prailgina drabužio tarnavimo laiką ir naudoja iki 60% mažiau energijos nei 60°C."},
+    {id:"w40",short:"Skalbti 40°C",title:"Skalbti mašinoje 40°C",text:"Šiltas režimas, tinkantis daugumai kasdienių drabužių. Veiksmingas bendram nešvarumui.",tip:"Geras valymo galios ir energijos suvartojimo balansas įprastoms skalbinėms."},
+    {id:"w60",short:"Skalbti 60°C",title:"Skalbti mašinoje 60°C",text:"Karštas skalbimas labai nešvariems gaminiams arba kai reikalinga higienos dezinfekcija.",tip:"Rezervuokite tik gaminiams, kuriems tikrai reikia aukštos temperatūros dezinfekavimo."},
+    {id:"hand",short:"Plauti rankomis",title:"Plauti tik rankomis",text:"Neskalbti mašinoje. Plauti rankomis vėsiame vandenyje su švelniu skalbikliu.",tip:"Spauskite švelniai — niekada nesukite ar nespaudykite audinio."},
+    {id:"gentle",short:"Švelnus režimas",title:"Skalbti mašinoje — švelniu režimu",text:"Galima skalbti mašinoje, bet tik švelniame arba delikačiame režime su sumažintu sukimu.",tip:"Skalbinių tinklelio maišelis suteikia papildomą apsaugą delikatiems gaminiams."},
+    {id:"nowash",short:"Neskalbti",title:"Neskalbti",text:"Šio gaminio negalima skalbti vandeniu namuose. Tik taškinė priežiūra arba cheminis valymas.",tip:"Patikrinkite etiketę dėl cheminio valymo ar specialios priežiūros nurodymų."},
+  ]},
+  {cat:"Balinimas",items:[
+    {id:"bleach",short:"Galima balinti",title:"Balinimas leidžiamas",text:"Galima naudoti chloro baliklius. Paprastai taikoma baltoms medvilninėms prekėms.",tip:"Naudokite saikingai — baliklis gadina audinio skaidulas ir trumpina tarnavimo laiką."},
+    {id:"nonchlorine",short:"Tik ne chloro",title:"Tik ne chloro baliklis",text:"Leidžiami deguonies pagrindu pagaminti balikliai. Chloro baliklis sugadins šį audinį.",tip:"Deguonies baliklis švelnesnis audiniui ir aplinkai palankesnis nei chloro."},
+    {id:"nobleach",short:"Nebalinti",title:"Nebalinti",text:"Draudžiami bet kokie balikliai. Spalva, pluoštas ar apdaila būtų nepataisomai sugadinti.",tip:"Išbandykite baltą actą ar kepimo sodą, ištirpintą vandenyje, kaip natūralias alternatyvas."},
+  ]},
+  {cat:"Džiovinimas",items:[
+    {id:"tumble",short:"Džiovyklėje",title:"Džiovinti džiovyklėje",text:"Gaminį galima džiovinti džiovyklėje. Vienas taškas = žema temperatūra, du taškai = vidutinė.",tip:"Žemesnė temperatūra apsaugo audinio skaidulas ir taupo energiją — visada geriau."},
+    {id:"notumble",short:"Ne džiovyklėje",title:"Nedžiovinti džiovyklėje",text:"Nedėti į džiovyklę. Karštis ar sukimasis sugadins arba sutraukys šį gaminį.",tip:"Formuokite drėgną gaminį ir džiovinkite ant plokšto paviršiaus ar pečių."},
+    {id:"hang",short:"Kabinti džiovinti",title:"Džiovinti pakabinus",text:"Džiovinti pakabinus ant virvelės ar pakabos. Nedžiovinti džiovyklėje.",tip:"Džiovinkite pavėsyje, kad išvengtumėte išblukimo — ypač svarbu tamsiems audiniams."},
+    {id:"flat",short:"Džiovinti gulint",title:"Džiovinti gulint",text:"Guldyti ant švarios, sausos paviršiaus džiovintis. Apsaugo nuo tempimosi.",tip:"Padėkite ant švario rankšluosčio ir formuokite iki originalių matmenų, kol dar drėgna."},
+  ]},
+  {cat:"Lyginimas",items:[
+    {id:"iron1",short:"Lyginti žemai",title:"Lyginti žema temperatura (maks. 110°C / 1 taškas)",text:"Naudoti žemiausią lygintuvo temperatūrą. Tinka sintetikams: poliesteriui, nailonui, akriliui.",tip:"Sintetikai gali išsilydyti aukštesnėje temperatūroje — visada patikrinkite pirmiausia."},
+    {id:"iron2",short:"Lyginti vidutiniškai",title:"Lyginti vidutine temperatura (maks. 150°C / 2 taškai)",text:"Naudoti vidutinę temperatūrą. Tinka vilnai, poliesterio mišiniams ir šilkui.",tip:"Naudokite presavimo skudurą tarp lygintuvo ir delikataus paviršiaus apsaugai."},
+    {id:"iron3",short:"Lyginti aukštai",title:"Lyginti aukšta temperatura (maks. 200°C / 3 taškai)",text:"Naudoti aukščiausią lygintuvo temperatūrą. Tinka medvilnei ir linams.",tip:"Šiek tiek drėgna medvilnė ir linas lyginami daug lengviau ir su geresniu rezultatu."},
+    {id:"noiron",short:"Nelyginti",title:"Nelyginti",text:"Nenaudoti lygintuvo. Audinys arba apdaila būtų sugadinta.",tip:"Išbandykite garų generatorių, laikomą atstumu, arba pakabinkite garintame vonios kambaryje."},
+    {id:"nosteam",short:"Be garo",title:"Lyginti be garo",text:"Tik sausas lyginimas. Nenaudoti garo funkcijos — ji gali palikti žymes ar sugadinti audinį.",tip:"Paprastai taikoma aksomui, žvynams ar gaminiams su jautriais vandeniui apdailomis."},
+  ]},
+  {cat:"Cheminis valymas",items:[
+    {id:"dryclean",short:"Cheminis valymas",title:"Cheminis valymas",text:"Atiduoti profesionaliam cheminio valymo meistrui. Gaminio negalima saugiai skalbti vandeniu.",tip:"Paklauskite savo valyklos apie drėgną valymą — tai švelnesnis ir ekologiškesnis variantas."},
+    {id:"drycleanP",short:"Chem. valymas — P",title:"Cheminis valymas konkrečiais tirpikliais (P)",text:"Cheminis valymas naudojant bet kokį tirpiklį, išskyrus trichloretileną.",tip:"Perkloretilenas yra toksiškas. Ieškokite valyklų, siūlančių angliavandenilių ar drėgną valymą."},
+    {id:"nodryclean",short:"Ne chem. valymas",title:"Cheminis valymas draudžiamas",text:"Cheminio valymo tirpikliai sugadintų šį gaminį. Vadovaukitės skalbimo nurodymais.",tip:"Dažnai taikoma gumos pagrindo, PU padengtiems ar putplasčiu pildytiems gaminiams."},
+  ]},
+]};
+
+function sym(id){
+  const s={
+    w30:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M8 32 Q8 20 25 20 Q42 20 42 32 L42 40 L8 40 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><text x="25" y="35" text-anchor="middle" font-size="10" font-family="DM Sans,sans-serif" font-weight="600" fill="currentColor">30</text></svg>`,
+    w40:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M8 32 Q8 20 25 20 Q42 20 42 32 L42 40 L8 40 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><text x="25" y="35" text-anchor="middle" font-size="10" font-family="DM Sans,sans-serif" font-weight="600" fill="currentColor">40</text></svg>`,
+    w60:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M8 32 Q8 20 25 20 Q42 20 42 32 L42 40 L8 40 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><text x="25" y="35" text-anchor="middle" font-size="10" font-family="DM Sans,sans-serif" font-weight="600" fill="currentColor">60</text></svg>`,
+    hand:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M8 32 Q8 20 25 20 Q42 20 42 32 L42 40 L8 40 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><path d="M22 34 L22 27 Q22 23 25 23 Q28 23 28 27 L28 34" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>`,
+    gentle:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M8 30 Q8 19 25 19 Q42 19 42 30 L42 37 L8 37 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><line x1="8" y1="40" x2="42" y2="40" stroke="currentColor" stroke-width="2"/><text x="25" y="32" text-anchor="middle" font-size="9" font-family="DM Sans,sans-serif" font-weight="600" fill="currentColor">30</text></svg>`,
+    nowash:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M8 32 Q8 20 25 20 Q42 20 42 32 L42 40 L8 40 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><line x1="13" y1="13" x2="37" y2="37" stroke="currentColor" stroke-width="2.2"/><line x1="37" y1="13" x2="13" y2="37" stroke="currentColor" stroke-width="2.2"/></svg>`,
+    bleach:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M25 11 L41 38 L9 38 Z" stroke="currentColor" stroke-width="2.2" fill="none"/></svg>`,
+    nonchlorine:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M25 11 L41 38 L9 38 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><line x1="15" y1="29" x2="35" y2="36" stroke="currentColor" stroke-width="1.8"/><line x1="15" y1="34" x2="35" y2="41" stroke="currentColor" stroke-width="1.8"/></svg>`,
+    nobleach:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M25 11 L41 38 L9 38 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><line x1="13" y1="13" x2="37" y2="37" stroke="currentColor" stroke-width="2.2"/><line x1="37" y1="13" x2="13" y2="37" stroke="currentColor" stroke-width="2.2"/></svg>`,
+    tumble:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><rect x="8" y="8" width="34" height="34" rx="4" stroke="currentColor" stroke-width="2.2"/><circle cx="25" cy="25" r="10" stroke="currentColor" stroke-width="2.2"/></svg>`,
+    notumble:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><rect x="8" y="8" width="34" height="34" rx="4" stroke="currentColor" stroke-width="2.2"/><circle cx="25" cy="25" r="10" stroke="currentColor" stroke-width="2.2"/><line x1="12" y1="12" x2="38" y2="38" stroke="currentColor" stroke-width="2.2"/></svg>`,
+    hang:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><rect x="8" y="8" width="34" height="34" rx="3" stroke="currentColor" stroke-width="2.2"/><line x1="25" y1="14" x2="25" y2="36" stroke="currentColor" stroke-width="2"/></svg>`,
+    flat:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><rect x="8" y="8" width="34" height="34" rx="3" stroke="currentColor" stroke-width="2.2"/><line x1="14" y1="25" x2="36" y2="25" stroke="currentColor" stroke-width="2"/></svg>`,
+    iron1:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M10 30 Q10 19 28 19 L40 19 L40 28 Q40 34 34 36 L10 36 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><rect x="21" y="14" width="8" height="5" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="19" cy="30" r="2.5" fill="currentColor"/></svg>`,
+    iron2:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M10 30 Q10 19 28 19 L40 19 L40 28 Q40 34 34 36 L10 36 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><rect x="21" y="14" width="8" height="5" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="16" cy="30" r="2.5" fill="currentColor"/><circle cx="24" cy="30" r="2.5" fill="currentColor"/></svg>`,
+    iron3:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M10 30 Q10 19 28 19 L40 19 L40 28 Q40 34 34 36 L10 36 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><rect x="21" y="14" width="8" height="5" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="13" cy="30" r="2.5" fill="currentColor"/><circle cx="21" cy="30" r="2.5" fill="currentColor"/><circle cx="29" cy="30" r="2.5" fill="currentColor"/></svg>`,
+    noiron:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M10 30 Q10 19 28 19 L40 19 L40 28 Q40 34 34 36 L10 36 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><line x1="11" y1="13" x2="39" y2="39" stroke="currentColor" stroke-width="2.2"/><line x1="39" y1="13" x2="11" y2="39" stroke="currentColor" stroke-width="2.2"/></svg>`,
+    nosteam:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M10 30 Q10 19 28 19 L40 19 L40 28 Q40 34 34 36 L10 36 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><rect x="21" y="14" width="8" height="5" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="8" y1="10" x2="42" y2="42" stroke="currentColor" stroke-width="2.2"/></svg>`,
+    dryclean:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><circle cx="25" cy="25" r="17" stroke="currentColor" stroke-width="2.2"/><text x="25" y="30" text-anchor="middle" font-size="13" font-family="DM Sans,sans-serif" font-weight="600" fill="currentColor">A</text></svg>`,
+    drycleanP:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><circle cx="25" cy="25" r="17" stroke="currentColor" stroke-width="2.2"/><text x="25" y="30" text-anchor="middle" font-size="13" font-family="DM Sans,sans-serif" font-weight="600" fill="currentColor">P</text></svg>`,
+    nodryclean:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><circle cx="25" cy="25" r="17" stroke="currentColor" stroke-width="2.2"/><line x1="12" y1="12" x2="38" y2="38" stroke="currentColor" stroke-width="2.2"/><line x1="38" y1="12" x2="12" y2="38" stroke="currentColor" stroke-width="2.2"/></svg>`,
+  };
+  return s[id]||'';
+}
+
+let selCare=null;
+function renderCare(){
+  selCare=null;
+  document.getElementById('care-cats').innerHTML=CARE[lang].map((cat,ci)=>`
+    <div class="care-cat">
+      <div class="care-cat-ttl">${cat.cat}</div>
+      <div class="care-grid">
+        ${cat.items.map(item=>`<div class="care-item" id="ci-${item.id}" onclick="showCare('${item.id}',${ci})">${sym(item.id)}<div class="care-short">${item.short}</div></div>`).join('')}
+      </div>
+      <div class="care-detail" id="det-${ci}"></div>
+    </div>`).join('');
+}
+function showCare(id,ci){
+  const item=CARE[lang].flatMap(c=>c.items).find(i=>i.id===id);if(!item)return;
+  if(selCare===id){
+    selCare=null;
+    document.querySelectorAll('.care-item').forEach(e=>e.classList.remove('sel'));
+    CARE[lang].forEach((_,i)=>{const d=document.getElementById('det-'+i);if(d){d.classList.remove('vis');d.innerHTML='';}});
+    return;
+  }
+  document.querySelectorAll('.care-item').forEach(e=>e.classList.remove('sel'));
+  CARE[lang].forEach((_,i)=>{const d=document.getElementById('det-'+i);if(d){d.classList.remove('vis');d.innerHTML='';}});
+  document.getElementById('ci-'+id).classList.add('sel');
+  selCare=id;
+  const det=document.getElementById('det-'+ci);
+  det.innerHTML=`<div class="care-detail-ttl">${item.title}</div><div class="care-detail-txt">${item.text}</div><div class="care-detail-tip">💡 ${item.tip}</div>`;
+  det.classList.add('vis');
+}
+
+// ─── LANGUAGE SWITCH ─────────────────────────────────────────
+function applyLangUI(){
+  const t=T[lang];
+  document.documentElement.lang=lang;
+  document.getElementById('brand-tag').textContent=t.brand_tag;
+  document.getElementById('tab-btn-checker').textContent=t.tab_checker;
+  document.getElementById('tab-btn-care').textContent=t.tab_care;
+  document.getElementById('checker-title').textContent=t.checker_title;
+  document.getElementById('checker-sub').textContent=t.checker_sub;
+  document.getElementById('add-btn').textContent=t.add_btn;
+  document.getElementById('total-lbl').textContent=t.total_lbl;
+  document.getElementById('care-title').textContent=t.care_title;
+  document.getElementById('care-sub').textContent=t.care_sub;
+  document.querySelectorAll('.mat-select').forEach(sel=>{const v=sel.value;sel.innerHTML=matOptions();if(v)sel.value=v;});
+  renderCare();
+  const rows=getRows();const tot=rows.reduce((s,r)=>s+r.pct,0);
+  if(tot===100)showResults(rows);else updateTotal();
+}
+function setLang(l,btn){
+  if(lang===l)return;lang=l;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyLangUI();
+}
+
+// ─── TAB NAVIGATION ──────────────────────────────────────────
+function showTab(id,btn){
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+applyLangUI();
+addRow();
+addRow();
+</script>
+</body>
+</html>

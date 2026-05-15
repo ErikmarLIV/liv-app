@@ -9,6 +9,8 @@
 :root{--bg:#F6F1E7;--surface:#EDE6D3;--surface2:#E0D8C3;--primary:#1E3A0E;--primary-lt:#2D561A;--accent:#C4622D;--text:#1A1A1A;--muted:#6B6358;--border:#C8BFB0;--good:#2A6219;--okay:#8B6914;--bad:#B5321A;--r:12px;}
 html{background:#F6F1E7;}
 *{box-sizing:border-box;margin:0;padding:0;}
+button{-webkit-appearance:none;appearance:none;background:transparent;border:none;outline:none;}
+input{-webkit-appearance:none;appearance:none;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto;padding-bottom:32px;}
 header{background:var(--primary);padding:16px 18px 0;position:sticky;top:0;z-index:100;}
 .brand{display:flex;align-items:center;gap:10px;padding-bottom:13px;}
@@ -80,6 +82,7 @@ nav{display:flex;border-top:1px solid rgba(255,255,255,.12);}
 .care-detail-ttl{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;margin-bottom:8px;}
 .care-detail-txt{font-size:13px;line-height:1.6;opacity:.85;}
 .care-detail-tip{margin-top:10px;padding-top:9px;border-top:1px solid rgba(246,241,231,.2);font-size:12px;opacity:.7;font-style:italic;}
+.skin-card{background:#DFF0D8;color:#1A5012;border-radius:var(--r);padding:14px 16px;margin-top:10px;font-size:13px;line-height:1.6;}
 </style>
 </head>
 <body>
@@ -147,7 +150,8 @@ en:{
   bio_yes:"Biodegradable",bio_partial:"Partially biodegradable",bio_no:"Not biodegradable",
   micro_none:"\u2713 No microplastic shedding",micro_low:"\u26A0 Low microplastic risk",micro_mid:"\u26A0 Microplastic shedding risk",micro_high:"\u26A0 High microplastic shedding",
   co2_ctx:v=>{const km=Math.round(v/0.21);if(v<5)return"Lower than most natural fibres \u2014 solid choice.";if(v<15)return`Equivalent to ~${km}\u202Fkm driven by car per kg of fabric.`;return`Equivalent to ~${km}\u202Fkm driven \u2014 significant footprint.`;},
-  cat_plant:"\u2014 Natural Plant Fibres \u2014",cat_animal:"\u2014 Natural Animal Fibres \u2014",cat_semi:"\u2014 Semi-Synthetic Fibres \u2014",cat_synth:"\u2014 Synthetic Fibres \u2014"
+  cat_plant:"\u2014 Natural Plant Fibres \u2014",cat_animal:"\u2014 Natural Animal Fibres \u2014",cat_semi:"\u2014 Semi-Synthetic Fibres \u2014",cat_synth:"\u2014 Synthetic Fibres \u2014",
+  skin_benefit:"\U0001F33F Natural fibres are generally more breathable and better at moisture management, creating a less hospitable environment for bacteria against the skin."
 },
 lt:{
   brand_tag:"Pa\u017eink savo audin\u012f",tab_checker:"Med\u017eiag\u0173 tikrintuvas",tab_care:"Prie\u017ei\u016bros etike\u010d\u0117s",
@@ -174,7 +178,8 @@ lt:{
   bio_yes:"Biologi\u0161kai su\u012frantis",bio_partial:"I\u0161 dalies biologi\u0161kai su\u012frantis",bio_no:"Nesu\u012frantis biologi\u0161kai",
   micro_none:"\u2713 Mikroplastikas nesiskiria",micro_low:"\u26A0 Ma\u017ea mikroplastiko rizika",micro_mid:"\u26A0 Mikroplastiko patekimo rizika",micro_high:"\u26A0 Didelis mikroplastiko kiekis",
   co2_ctx:v=>{const km=Math.round(v/0.21);if(v<5)return"Ma\u017eesnis nei dauguma nat\u016brali\u0173 plu\u0161t\u0173 \u2014 puikus pasirinkimas.";if(v<15)return`Atitinka ~${km}\u202Fkm kelion\u0119 automobiliu vienam kg audinio.`;return`Atitinka ~${km}\u202Fkm kelion\u0119 \u2014 rei\u0161kmingas p\u0117dsakas.`;},
-  cat_plant:"\u2014 Nat\u016bral\u016bs augaliniai plu\u0161tai \u2014",cat_animal:"\u2014 Nat\u016bral\u016bs gyv\u016bniniai plu\u0161tai \u2014",cat_semi:"\u2014 Pusiau sintetiniai plu\u0161tai \u2014",cat_synth:"\u2014 Sintetiniai plu\u0161tai \u2014"
+  cat_plant:"\u2014 Nat\u016bral\u016bs augaliniai plu\u0161tai \u2014",cat_animal:"\u2014 Nat\u016bral\u016bs gyv\u016bniniai plu\u0161tai \u2014",cat_semi:"\u2014 Pusiau sintetiniai plu\u0161tai \u2014",cat_synth:"\u2014 Sintetiniai plu\u0161tai \u2014",
+  skin_benefit:"\U0001F33F Nat\u016bralieji plu\u0161tai paprastai yra kvapnesni ir geriau reguliuoja dr\u0117gm\u0119, tod\u0117l ma\u017eiau bakterij\u0173 kaupiasi ant odos."
 }};
 
 const M_ORDER=[
@@ -274,6 +279,8 @@ function updateTotal(){
 }
 function showResults(rows){
   const s=calcScore(rows);const g=getGrade(s);const t=T[lang];
+  const NATURAL=new Set(["Cotton","Cotton (Organic)","Linen","Hemp","Jute","Bamboo (mechanical)","Wool","Merino Wool","Alpaca","Cashmere","Mohair","Silk"]);
+  const naturalPct=rows.reduce((sum,r)=>NATURAL.has(r.key)?sum+r.pct:sum,0);
   const wsIdx=Math.min(Math.round(s.ws),4);
   const chIdx=Math.min(Math.max(Math.round(s.chem)-1,0),3);
   const wsl=s.ws<1?'good':s.ws<2.5?'okay':s.ws<4?'bad':'vbad';
@@ -294,6 +301,7 @@ function showResults(rows){
       <div class="metric-card"><div class="metric-nm" style="margin-bottom:8px;">${t.metric_chem}</div><div class="mbar"><div class="mbar-fill fill-${chl}" style="width:${Math.min((s.chem-1)/4*100,100)}%"></div></div><div class="metric-ctx">${t.ch[chIdx]}</div></div>
       <div class="metric-card"><div class="metric-nm" style="margin-bottom:10px;">${t.metric_eol}</div><div><span class="badge ${bc}">${bl}</span></div><div><span class="badge ${mc}">${ml}</span></div></div>
       ${contexts?`<div class="tips-box"><div class="tips-title">${t.context_head}</div>${contexts}</div>`:''}
+      ${naturalPct>=90?`<div class="skin-card">${t.skin_benefit}</div>`:''}
     </div>`;
 }
 
@@ -367,12 +375,12 @@ lt:[
 
 function sym(id){
   const s={
-    w30:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M8 32 Q8 20 25 20 Q42 20 42 32 L42 40 L8 40 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><text x="25" y="35" text-anchor="middle" font-size="10" font-family="DM Sans,sans-serif" font-weight="600" fill="currentColor">30</text></svg>`,
-    w40:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M8 32 Q8 20 25 20 Q42 20 42 32 L42 40 L8 40 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><text x="25" y="35" text-anchor="middle" font-size="10" font-family="DM Sans,sans-serif" font-weight="600" fill="currentColor">40</text></svg>`,
-    w60:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M8 32 Q8 20 25 20 Q42 20 42 32 L42 40 L8 40 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><text x="25" y="35" text-anchor="middle" font-size="10" font-family="DM Sans,sans-serif" font-weight="600" fill="currentColor">60</text></svg>`,
-    hand:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M8 32 Q8 20 25 20 Q42 20 42 32 L42 40 L8 40 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><path d="M22 34 L22 27 Q22 23 25 23 Q28 23 28 27 L28 34" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>`,
-    gentle:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M8 30 Q8 19 25 19 Q42 19 42 30 L42 37 L8 37 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><line x1="8" y1="40" x2="42" y2="40" stroke="currentColor" stroke-width="2"/><text x="25" y="32" text-anchor="middle" font-size="9" font-family="DM Sans,sans-serif" font-weight="600" fill="currentColor">30</text></svg>`,
-    nowash:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M8 32 Q8 20 25 20 Q42 20 42 32 L42 40 L8 40 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><line x1="13" y1="13" x2="37" y2="37" stroke="currentColor" stroke-width="2.2"/><line x1="37" y1="13" x2="13" y2="37" stroke="currentColor" stroke-width="2.2"/></svg>`,
+    w30:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M7,38 L7,15 Q7,13 9,13 L41,13 Q43,13 43,15 L43,38 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><text x="25" y="32" text-anchor="middle" font-size="11" font-family="DM Sans,sans-serif" font-weight="600" fill="currentColor">30</text></svg>`,
+    w40:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M7,38 L7,15 Q7,13 9,13 L41,13 Q43,13 43,15 L43,38 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><text x="25" y="32" text-anchor="middle" font-size="11" font-family="DM Sans,sans-serif" font-weight="600" fill="currentColor">40</text></svg>`,
+    w60:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M7,38 L7,15 Q7,13 9,13 L41,13 Q43,13 43,15 L43,38 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><text x="25" y="32" text-anchor="middle" font-size="11" font-family="DM Sans,sans-serif" font-weight="600" fill="currentColor">60</text></svg>`,
+    hand:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M7,38 L7,17 Q7,15 9,15 L41,15 Q43,15 43,17 L43,38 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><line x1="15" y1="9" x2="15" y2="26" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><line x1="20" y1="7" x2="20" y2="26" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><line x1="25" y1="7" x2="25" y2="26" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><line x1="30" y1="7" x2="30" y2="26" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><line x1="35" y1="9" x2="35" y2="26" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M15,26 Q15,34 25,34 Q35,34 35,26" stroke="currentColor" stroke-width="1.9" fill="none"/></svg>`,
+    gentle:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M7,36 L7,15 Q7,13 9,13 L41,13 Q43,13 43,15 L43,36 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><text x="25" y="30" text-anchor="middle" font-size="11" font-family="DM Sans,sans-serif" font-weight="600" fill="currentColor">30</text><line x1="7" y1="40" x2="43" y2="40" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+    nowash:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M7,38 L7,15 Q7,13 9,13 L41,13 Q43,13 43,15 L43,38 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><line x1="14" y1="14" x2="36" y2="36" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><line x1="36" y1="14" x2="14" y2="36" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>`,
     bleach:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M25 11 L41 38 L9 38 Z" stroke="currentColor" stroke-width="2.2" fill="none"/></svg>`,
     nonchlorine:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M25 11 L41 38 L9 38 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><line x1="15" y1="29" x2="35" y2="36" stroke="currentColor" stroke-width="1.8"/><line x1="15" y1="34" x2="35" y2="41" stroke="currentColor" stroke-width="1.8"/></svg>`,
     nobleach:`<svg viewBox="0 0 50 50" fill="none" class="care-sym"><path d="M25 11 L41 38 L9 38 Z" stroke="currentColor" stroke-width="2.2" fill="none"/><line x1="13" y1="13" x2="37" y2="37" stroke="currentColor" stroke-width="2.2"/><line x1="37" y1="13" x2="13" y2="37" stroke="currentColor" stroke-width="2.2"/></svg>`,
